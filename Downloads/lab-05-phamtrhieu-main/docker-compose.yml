@@ -1,0 +1,71 @@
+services:
+  # Service API FastAPI
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fit4110-api-lab05
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      ai-service:
+        condition: service_healthy
+    networks:
+      - team-internal
+      - class-net
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # PostgreSQL database service
+  db:
+    image: postgres:15-alpine
+    container_name: fit4110-db-lab05
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-lab05}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lab05pass}
+      POSTGRES_DB: ${POSTGRES_DB:-iotdb}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - team-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lab05}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # AI service mock dung FastAPI
+  ai-service:
+    image: python:3.11-slim
+    container_name: fit4110-ai-lab05
+    working_dir: /service
+    volumes:
+      - ./src/ai_service:/service
+    command: >
+      sh -c "pip install fastapi uvicorn pydantic --quiet &&
+             uvicorn main:app --host 0.0.0.0 --port 9000"
+    networks:
+      - team-internal
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:9000/health')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+networks:
+  team-internal:
+    driver: bridge
+  class-net:
+    external: true
+
+volumes:
+  db-data:
