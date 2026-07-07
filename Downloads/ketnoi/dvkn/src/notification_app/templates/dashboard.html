@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notification Service Dashboard</title>
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --dnu-orange: #eb5e00;
+      --dnu-orange-hover: #d15200;
+      --dnu-orange-glow: rgba(235, 94, 0, 0.2);
+      --bg-light: #f8fafc;
+      --bg-card: #ffffff;
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.1);
+      --error: #ef4444;
+      --error-bg: rgba(239, 68, 68, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-light);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(235, 94, 0, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.02) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 3rem;
+    }
+
+
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Main Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    header h1 span {
+      background: rgba(235, 94, 0, 0.1);
+      border: 1px solid rgba(235, 94, 0, 0.2);
+      color: var(--dnu-orange);
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    .radmin-info {
+      text-align: right;
+      background: #f1f5f9;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .radmin-info .ip-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .radmin-info .ip-val {
+      font-family: monospace;
+      color: var(--dnu-orange);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    /* Grid Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 900px) {
+      .grid {
+        grid-template-columns: 360px 1fr;
+      }
+    }
+
+    /* Health Cards */
+    .health-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+
+    .card.healthy::before {
+      background-color: var(--success);
+    }
+
+    .card.error::before {
+      background-color: var(--error);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-title {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text-main);
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge.healthy {
+      background: var(--success-bg);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .badge.error {
+      background: var(--error-bg);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .card-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .card-meta span {
+      font-family: monospace;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    /* Form Section */
+    .form-card h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-main);
+      border-bottom: 2px solid var(--dnu-orange);
+      padding-bottom: 0.4rem;
+    }
+
+    .form-group {
+      margin-bottom: 0.85rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+      font-weight: 600;
+    }
+
+    .form-control, select, textarea {
+      width: 100%;
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.5rem 0.7rem;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus, select:focus, textarea:focus {
+      border-color: var(--dnu-orange);
+      box-shadow: 0 0 0 3px var(--dnu-orange-glow);
+      background: #ffffff;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .btn-icon {
+      background: rgba(235, 94, 0, 0.08);
+      border: 1px solid rgba(235, 94, 0, 0.2);
+      color: var(--dnu-orange);
+      border-radius: 6px;
+      padding: 0 0.7rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(235, 94, 0, 0.15);
+    }
+
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.4rem;
+      background: #f8fafc;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .checkbox-label input {
+      accent-color: var(--dnu-orange);
+      width: 14px;
+      height: 14px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--dnu-orange);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.65rem;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(235, 94, 0, 0.2);
+      transition: transform 0.1s, background-color 0.2s;
+      margin-top: 0.4rem;
+    }
+
+    .btn-submit:hover {
+      background-color: var(--dnu-orange-hover);
+    }
+
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    /* Logs/Table Section */
+    .history-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 550px;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid var(--dnu-orange);
+      padding-bottom: 0.4rem;
+    }
+
+    .history-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .table-container {
+      overflow-y: auto;
+      flex-grow: 1;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: #ffffff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.8rem;
+    }
+
+    th {
+      background: #f1f5f9;
+      position: sticky;
+      top: 0;
+      padding: 0.65rem 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    tr:hover td {
+      background: rgba(235, 94, 0, 0.02);
+    }
+
+    .status-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-badge.delivered {
+      background: rgba(16, 185, 129, 0.12);
+      color: #059669;
+    }
+
+    .status-badge.pending {
+      background: rgba(245, 158, 11, 0.12);
+      color: #d97706;
+    }
+
+    .status-badge.failed {
+      background: rgba(239, 68, 68, 0.12);
+      color: #dc2626;
+    }
+
+    .status-badge.duplicate {
+      background: rgba(148, 163, 184, 0.15);
+      color: #475569;
+    }
+
+    .status-badge.logged {
+      background: rgba(6, 182, 212, 0.12);
+      color: #0891b2;
+    }
+
+
+    .channel-badge {
+      background: rgba(235, 94, 0, 0.06);
+      border: 1px solid rgba(235, 94, 0, 0.15);
+      padding: 0.1rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      color: var(--dnu-orange);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 9999;
+    }
+
+    .toast {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--dnu-orange);
+      color: var(--text-main);
+      padding: 0.85rem;
+      border-radius: 6px;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+      min-width: 280px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideIn 0.3s ease;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .toast.success {
+      border-left-color: var(--success);
+    }
+
+    .toast.error {
+      border-left-color: var(--error);
+    }
+
+    .toast-close {
+      cursor: pointer;
+      color: var(--text-muted);
+      font-weight: bold;
+      margin-left: 10px;
+      font-size: 1.1rem;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div>
+        <h1 style="color: var(--text-main);">
+          <span style="background: var(--dnu-orange); color: white; border: none; font-size: 1rem; padding: 0.3rem 0.8rem;">DNU</span>
+          Dịch vụ Thông báo Cảnh báo (Notification Service)
+        </h1>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem; font-weight: 500;">
+          Dự án kết nối tích hợp Buổi 6 - Phân tích & Phân phối thông báo đa kênh
+        </p>
+      </div>
+      <div class="radmin-info">
+        <div class="ip-label">Địa chỉ IP Radmin VPN</div>
+        <div class="ip-val" id="radmin-ip">Đang lấy IP...</div>
+      </div>
+    </header>
+
+    <!-- Grid -->
+    <div class="grid">
+      <!-- Left column: Health & Control Form -->
+      <div class="health-section">
+        <!-- Health Card: API -->
+        <div class="card healthy" id="health-api">
+          <div class="card-header">
+            <div class="card-title">API Notification</div>
+            <div class="badge healthy" id="status-api">HOẠT ĐỘNG</div>
+          </div>
+          <div class="card-meta">
+            Cổng kết nối: <span>8000</span> | Trạng thái: <span>Sẵn sàng</span><br>
+            Thời gian: <span id="time-api">--</span>
+          </div>
+        </div>
+
+        <!-- Health Card: DB -->
+        <div class="card healthy" id="health-db">
+          <div class="card-header">
+            <div class="card-title">Cơ sở dữ liệu PostgreSQL</div>
+            <div class="badge healthy" id="status-db">HOẠT ĐỘNG</div>
+          </div>
+          <div class="card-meta">
+            Địa chỉ: <span>db:5432</span> | Phiên bản: <span>Postgres 15</span><br>
+            Trạng thái: <span id="meta-db">--</span>
+          </div>
+        </div>
+
+        <!-- Health Card: AI Service -->
+        <div class="card healthy" id="health-ai">
+          <div class="card-header">
+            <div class="card-title">Dịch vụ AI cục bộ</div>
+            <div class="badge healthy" id="status-ai">HOẠT ĐỘNG</div>
+          </div>
+          <div class="card-meta">
+            Địa chỉ: <span>ai-service:9000</span> | Mô hình: <span>YOLO Mock</span><br>
+            Trạng thái: <span id="meta-ai">--</span>
+          </div>
+        </div>
+
+        <!-- Control Form Card -->
+        <div class="card form-card">
+          <h2>
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" style="color: var(--dnu-orange); vertical-align: middle; margin-right: 4px;">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h-3V9h5v8zm0-10h-2V5h2v2z"/>
+            </svg>
+            Bảng điều khiển Bắn thử
+          </h2>
+          
+          <form id="trigger-form">
+            <div class="form-group">
+              <label for="event-type">Loại sự kiện (Đường dẫn Endpoint)</label>
+              <select id="event-type">
+                <option value="alert.created">/events/alert.created (Tạo mới)</option>
+                <option value="alert.escalated">/events/alert.escalated (Leo thang)</option>
+                <option value="alert.resolved">/events/alert.resolved (Khắc phục)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="event-id">Mã Sự kiện (Event ID - UUID v4)</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="event-id" readonly>
+                <button type="button" class="btn-icon" id="btn-gen-uuid" title="Tạo mã ngẫu nhiên">⚡</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="alert-id">Mã Cảnh báo (Alert ID)</label>
+              <input type="text" class="form-control" id="alert-id" value="ALT-2026-06-18-001">
+            </div>
+
+            <div class="form-group">
+              <label for="alert-title">Tiêu đề cảnh báo</label>
+              <input type="text" class="form-control" id="alert-title" value="Cảnh báo phát hiện xâm nhập">
+            </div>
+
+            <div class="form-group">
+              <label for="alert-message">Nội dung chi tiết</label>
+              <textarea id="alert-message" rows="2">Phát hiện đối tượng di chuyển bất thường tại khu vực Cổng chính DNU</textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Kênh nhận thông báo (Tối đa 4)</label>
+              <div class="checkbox-group">
+                <label class="checkbox-label"><input type="checkbox" name="channels" value="telegram" checked> Telegram</label>
+                <label class="checkbox-label"><input type="checkbox" name="channels" value="email" checked> Email</label>
+                <label class="checkbox-label"><input type="checkbox" name="channels" value="app" checked> Ứng dụng</label>
+                <label class="checkbox-label"><input type="checkbox" name="channels" value="sms"> Tin nhắn SMS</label>
+              </div>
+            </div>
+
+            <div class="form-group" style="display:none;">
+              <label for="bearer-token">Token Xác thực</label>
+              <input type="text" class="form-control" id="bearer-token" value="local-dev-token">
+            </div>
+
+            <button type="submit" class="btn-submit">Bắn thử Sự kiện Cảnh báo</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Right column: Logs & Tables -->
+      <div>
+        <div class="card history-card">
+          <div class="history-header">
+            <h2>Nhật ký Thông báo Thời gian thực</h2>
+            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">
+              Tự động cập nhật sau mỗi 3 giây
+            </div>
+          </div>
+          
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mã Giao dịch (Delivery ID)</th>
+                  <th>Mã Cảnh báo (Alert ID)</th>
+                  <th>Kênh truyền</th>
+                  <th>Trạng thái gửi</th>
+                  <th>Thời gian gửi</th>
+                </tr>
+              </thead>
+              <tbody id="notifications-table-body">
+                <tr>
+                  <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem 0;">Chưa nhận được sự kiện nào. Hãy bắn thử sự kiện từ bảng điều khiển hoặc chờ tín hiệu từ Core Business (A6).</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    // Constants
+    const BASE_URL = window.location.origin;
+
+    // Helpers
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <span>${message}</span>
+        <span class="toast-close" onclick="this.parentElement.remove()">×</span>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 5000);
+    }
+
+    // Initialize UUID
+    document.getElementById('event-id').value = generateUUID();
+    document.getElementById('btn-gen-uuid').addEventListener('click', () => {
+      document.getElementById('event-id').value = generateUUID();
+    });
+
+    // Load Health and server details
+    async function fetchServerDetails() {
+      try {
+        const res = await fetch(`${BASE_URL}/health`);
+        if (res.ok) {
+          const data = await res.json();
+          // Set timestamp
+          document.getElementById('time-api').innerText = new Date(data.timestamp).toLocaleString('vi-VN');
+          
+          // Dependencies
+          const dbStatus = data.dependencies.database;
+          const dbCard = document.getElementById('health-db');
+          const dbBadge = document.getElementById('status-db');
+          const dbMeta = document.getElementById('meta-db');
+          if (dbStatus.includes('ok')) {
+            dbCard.className = 'card healthy';
+            dbBadge.className = 'badge healthy';
+            dbBadge.innerText = 'HOẠT ĐỘNG';
+            dbMeta.innerText = 'Đã kết nối';
+          } else {
+            dbCard.className = 'card error';
+            dbBadge.className = 'badge error';
+            dbBadge.innerText = 'DỰ PHÒNG';
+            dbMeta.innerText = 'Đang lưu tạm bộ nhớ';
+          }
+
+          const aiStatus = data.dependencies.ai_service;
+          const aiCard = document.getElementById('health-ai');
+          const aiBadge = document.getElementById('status-ai');
+          const aiMeta = document.getElementById('meta-ai');
+          if (aiStatus === 'ok') {
+            aiCard.className = 'card healthy';
+            aiBadge.className = 'badge healthy';
+            aiBadge.innerText = 'HOẠT ĐỘNG';
+            aiMeta.innerText = 'Đã kết nối';
+          } else {
+            aiCard.className = 'card error';
+            aiBadge.className = 'badge error';
+            aiBadge.innerText = 'NGOẠI TUYẾN';
+            aiMeta.innerText = 'Kết nối thất bại';
+          }
+
+          // API status
+          document.getElementById('health-api').className = 'card healthy';
+          document.getElementById('status-api').className = 'badge healthy';
+          document.getElementById('status-api').innerText = 'HOẠT ĐỘNG';
+        }
+      } catch (err) {
+        document.getElementById('health-api').className = 'card error';
+        document.getElementById('status-api').className = 'badge error';
+        document.getElementById('status-api').innerText = 'NGOẠI TUYẾN';
+      }
+    }
+
+    // Detect Radmin IP
+    function detectRadminIP() {
+      const hostname = window.location.hostname;
+      if (hostname.startsWith('26.')) {
+        document.getElementById('radmin-ip').innerText = hostname;
+      } else {
+        document.getElementById('radmin-ip').innerText = '26.95.36.20 (Local)';
+      }
+    }
+
+    // Fetch notifications list
+    async function fetchNotifications() {
+      try {
+        const token = document.getElementById('bearer-token').value;
+        const res = await fetch(`${BASE_URL}/api/v1/notifications`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const tbody = document.getElementById('notifications-table-body');
+          if (data && data.length > 0) {
+            tbody.innerHTML = '';
+            data.forEach(item => {
+              const tr = document.createElement('tr');
+              let statusText = 'Đang xử lý';
+              let statusClass = 'pending';
+              
+              if (item.status === 'delivered') {
+                statusText = 'Đã gửi';
+                statusClass = 'delivered';
+              } else if (item.status === 'failed') {
+                statusText = 'Thất bại';
+                statusClass = 'failed';
+              } else if (item.status === 'duplicate') {
+                statusText = 'Trùng lặp';
+                statusClass = 'duplicate';
+              } else if (item.status === 'logged') {
+                statusText = 'Đã ghi log';
+                statusClass = 'logged';
+              } else if (item.status === 'sending') {
+                statusText = item.retryCount > 0 ? `Đang gửi (Thử: ${item.retryCount})` : 'Đang gửi';
+                statusClass = 'pending';
+              }
+
+
+              // Translate channel labels
+              let chanText = item.channel;
+              if (item.channel === 'telegram') chanText = 'Telegram';
+              else if (item.channel === 'email') chanText = 'Email';
+              else if (item.channel === 'app') chanText = 'Ứng dụng';
+              else if (item.channel === 'sms') chanText = 'SMS';
+
+              tr.innerHTML = `
+                <td style="font-family: monospace; font-size: 0.75rem;" title="${item.deliveryId}">${item.deliveryId.substring(0, 8)}...</td>
+                <td style="font-weight: 600; color: var(--text-main);">${item.alertId}</td>
+                <td><span class="channel-badge">${chanText}</span></td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td style="color: var(--text-muted); font-size: 0.75rem;">${new Date(item.sentAt).toLocaleString('vi-VN')}</td>
+              `;
+              tbody.appendChild(tr);
+            });
+          } else {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem 0;">Chưa nhận được sự kiện nào. Hãy bắn thử sự kiện từ bảng điều khiển hoặc chờ tín hiệu từ Core Business (A6).</td></tr>`;
+          }
+        }
+      } catch (err) {
+        console.error('Không thể tải danh sách thông báo:', err);
+      }
+    }
+
+    // Form submission
+    document.getElementById('trigger-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const eventType = document.getElementById('event-type').value;
+      const eventId = document.getElementById('event-id').value;
+      const alertId = document.getElementById('alert-id').value;
+      const title = document.getElementById('alert-title').value;
+      const message = document.getElementById('alert-message').value;
+      const token = document.getElementById('bearer-token').value;
+      
+      const selectedChannels = Array.from(document.querySelectorAll('input[name="channels"]:checked')).map(el => el.value);
+
+      if (selectedChannels.length === 0) {
+        showToast('Vui lòng chọn ít nhất một kênh nhận thông báo', 'error');
+        return;
+      }
+
+      const payload = {
+        eventId: eventId,
+        eventType: eventType,
+        alertId: alertId,
+        correlationId: 'COR-' + generateUUID().substring(0, 8).toUpperCase(),
+        severity: 'HIGH',
+        payload: {
+          title: title,
+          message: message,
+          source: 'mock-web-dashboard'
+        },
+        channels: selectedChannels
+      };
+
+      try {
+        const response = await fetch(`${BASE_URL}/events/${eventType}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.status === 202) {
+          const result = await response.json();
+          showToast(`Đã bắn cảnh báo thành công! Mã sự kiện: ${result.eventId.substring(0, 8)}...`);
+          // Refresh lists
+          setTimeout(fetchNotifications, 500);
+          // Generate new UUID
+          document.getElementById('event-id').value = generateUUID();
+        } else {
+          const errData = await response.json().catch(() => ({}));
+          showToast(`Lỗi: ${errData.detail || response.statusText}`, 'error');
+        }
+      } catch (err) {
+        showToast('Kết nối thất bại: ' + err.message, 'error');
+      }
+    });
+
+    // Initialize and loops
+    fetchServerDetails();
+    detectRadminIP();
+    fetchNotifications();
+
+    setInterval(fetchServerDetails, 3000);
+    setInterval(fetchNotifications, 3000);
+  </script>
+</body>
+</html>
