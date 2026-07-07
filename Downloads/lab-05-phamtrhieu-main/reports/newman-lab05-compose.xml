@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="team-notify Notification Service" tests="9" time="0.255">
+  <testsuite name="01_Functional / GET /health" id="c6eeda40-d32b-45f5-b61d-fd650ccba4f6" timestamp="2026-06-17T15:13:27.065Z" tests="2" failures="0" errors="0" time="0.042">
+    <testcase name="Health returns 200" time="0.042" classname="01FunctionalGetHealth"/>
+    <testcase name="Health response has status ok" time="0.042" classname="01FunctionalGetHealth"/>
+  </testsuite>
+  <testsuite name="01_Functional / POST /events/alert.created" id="75fde3b4-d783-408c-b414-daa0e2188d56" timestamp="2026-06-17T15:13:27.065Z" tests="2" failures="0" errors="0" time="0.062">
+    <testcase name="Status is 202" time="0.062" classname="01FunctionalPostEventsAlertCreated"/>
+    <testcase name="Response contains eventId and queued" time="0.062" classname="01FunctionalPostEventsAlertCreated"/>
+  </testsuite>
+  <testsuite name="01_Functional / POST /events/alert.escalated" id="7da1d9c1-99b2-4c83-a3d1-43751285498d" timestamp="2026-06-17T15:13:27.065Z" tests="1" failures="0" errors="0" time="0.056">
+    <testcase name="Status is 202" time="0.056" classname="01FunctionalPostEventsAlertEscalated"/>
+  </testsuite>
+  <testsuite name="01_Functional / POST /events/alert.resolved" id="cdc119ce-263f-4c5e-bc5a-7ecdc0409d04" timestamp="2026-06-17T15:13:27.065Z" tests="1" failures="0" errors="0" time="0.041">
+    <testcase name="Status is 202" time="0.041" classname="01FunctionalPostEventsAlertResolved"/>
+  </testsuite>
+  <testsuite name="02_Auth / POST /events/alert.created (missing token)" id="3faf86f9-f49b-4504-bb7a-55aa32cde448" timestamp="2026-06-17T15:13:27.065Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="Unauthorized when missing token" time="0.005" classname="02AuthPostEventsAlertCreatedMissingToken"/>
+  </testsuite>
+  <testsuite name="03_Negative / POST /events/alert.created (missing fields)" id="a88d910f-477c-49c4-a337-94eefdd4bcea" timestamp="2026-06-17T15:13:27.065Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="Client error on invalid payload" time="0.005" classname="03NegativePostEventsAlertCreatedMissingFields"/>
+  </testsuite>
+  <testsuite name="04_Boundary_Reliability / POST /events/alert.created (too many channels)" id="c5dce887-37b8-4c8b-9661-19dadea853a5" timestamp="2026-06-17T15:13:27.065Z" tests="1" failures="0" errors="0" time="0.004">
+    <testcase name="Boundary returns client error or handles warning" time="0.004" classname="04BoundaryReliabilityPostEventsAlertCreatedTooManyChannels"/>
+  </testsuite>
+  <testsuite name="05_Consumer_side_Smoke / Smoke: POST alert.created then check notification (mock flow)" id="0a4fff08-724e-4b27-adae-e7e2e8e13aa1" timestamp="2026-06-17T15:13:27.065Z" tests="1" failures="0" errors="0" time="0.022">
+    <testcase name="Smoke queued" time="0.022" classname="05ConsumerSideSmokeSmokePostAlertCreatedThenCheckNotificationMockFlow"/>
+  </testsuite>
+  <testsuite name="06_Local_only_NonFunctional / GET /health (local perf)" id="d27812eb-2f0f-4069-96bc-a1c652cf1ac9" timestamp="2026-06-17T15:13:27.065Z" tests="1" failures="0" errors="0" time="0.018">
+    <testcase name="Response time below 1000ms" time="0.018" classname="06LocalOnlyNonFunctionalGetHealthLocalPerf"/>
+  </testsuite>
+</testsuites>

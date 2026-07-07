@@ -1,1 +1,0 @@
-# This file marks the iot_app package. No code is needed here.

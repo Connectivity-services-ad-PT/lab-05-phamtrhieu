@@ -1,0 +1,168 @@
+{
+  "info": {
+    "name": "team-notify Notification Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "01_Functional",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Health returns 200', function() { pm.response.to.have.status(200); });",
+                  "pm.test('Health response has status ok', function() { var j = pm.response.json(); pm.expect(j.status).to.eql('ok'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /events/alert.created",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"eventType\": \"alert.created\",\n  \"alertId\": \"ALT-2026-05-19-001\",\n  \"correlationId\": \"COR-2026-05-19-001\",\n  \"severity\": \"HIGH\",\n  \"timestamp\": \"2026-05-19T10:30:00Z\",\n  \"payload\": {\n    \"title\": \"Truy cập trái phép được phát hiện\",\n    \"message\": \"Cố gắng truy cập không được phép\",\n    \"source\": \"access-gate-01\"\n  },\n  \"channels\": [\"telegram\", \"email\", \"app\"]\n}"
+            },
+            "url": "{{baseUrl}}/events/alert.created"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 202', function() { pm.response.to.have.status(202); });",
+                  "pm.test('Response contains eventId and queued', function() { var j = pm.response.json(); pm.expect(j).to.have.property('eventId'); pm.expect(j.status).to.eql('queued'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /events/alert.escalated",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"550e8400-e29b-41d4-a716-446655440002\",\n  \"eventType\": \"alert.escalated\",\n  \"alertId\": \"ALT-2026-05-19-001\",\n  \"correlationId\": \"COR-2026-05-19-001\",\n  \"severity\": \"CRITICAL\",\n  \"timestamp\": \"2026-05-19T10:35:00Z\",\n  \"payload\": {\n    \"title\": \"CẢNH BÁO NGHIÊM TRỌNG\",\n    \"message\": \"Nhiều cố gắng xâm nhập liên tiếp\",\n    \"source\": \"access-gate-01\"\n  },\n  \"channels\": [\"telegram\", \"email\", \"app\", \"sms\"]\n}"
+            },
+            "url": "{{baseUrl}}/events/alert.escalated"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Status is 202', function() { pm.response.to.have.status(202); });"] }
+            }
+          ]
+        },
+        {
+          "name": "POST /events/alert.resolved",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"550e8400-e29b-41d4-a716-446655440003\",\n  \"eventType\": \"alert.resolved\",\n  \"alertId\": \"ALT-2026-05-19-001\",\n  \"correlationId\": \"COR-2026-05-19-001\",\n  \"severity\": \"HIGH\",\n  \"timestamp\": \"2026-05-19T11:00:00Z\",\n  \"payload\": {\n    \"title\": \"Cảnh báo đã được giải quyết\",\n    \"message\": \"Vụ xâm nhập đã được xử lý\",\n    \"source\": \"access-gate-01\"\n  },\n  \"channels\": [\"telegram\", \"email\", \"app\"]\n}"
+            },
+            "url": "{{baseUrl}}/events/alert.resolved"
+          },
+          "event": [
+            { "listen": "test", "script": { "exec": ["pm.test('Status is 202', function() { pm.response.to.have.status(202); });"] } }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02_Auth",
+      "item": [
+        {
+          "name": "POST /events/alert.created (missing token)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/events/alert.created"
+          },
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('Unauthorized when missing token', function() { pm.expect([401,403]).to.include(pm.response.code); });"] } } ]
+        }
+      ]
+    },
+    {
+      "name": "03_Negative",
+      "item": [
+        {
+          "name": "POST /events/alert.created (missing fields)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "body": { "mode": "raw", "raw": "{ \"eventId\": \"123\" }" },
+            "url": "{{baseUrl}}/events/alert.created"
+          },
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('Client error on invalid payload', function() { pm.expect([400,422]).to.include(pm.response.code); });"] } } ]
+        }
+      ]
+    },
+    {
+      "name": "04_Boundary_Reliability",
+      "item": [
+        {
+          "name": "POST /events/alert.created (too many channels)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "body": { "mode": "raw", "raw": "{ \"eventId\": \"e1\", \"eventType\": \"alert.created\", \"alertId\": \"a1\", \"correlationId\": \"c1\", \"severity\": \"HIGH\", \"timestamp\": \"2026-05-19T10:30:00Z\", \"payload\": { \"title\": \"t\", \"message\": \"m\", \"source\": \"s\" }, \"channels\": [\"telegram\",\"email\",\"app\",\"sms\",\"extra\"] }" },
+            "url": "{{baseUrl}}/events/alert.created"
+          },
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('Boundary returns client error or handles warning', function() { pm.expect([201,400,422,429]).to.include(pm.response.code); });"] } } ]
+        }
+      ]
+    },
+    {
+      "name": "05_Consumer_side_Smoke",
+      "item": [
+        {
+          "name": "Smoke: POST alert.created then check notification (mock flow)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "body": { "mode": "raw", "raw": "{ \"eventId\": \"550e8400-e29b-41d4-a716-446655440099\", \"eventType\": \"alert.created\", \"alertId\": \"SMOKE-1\", \"correlationId\": \"550e8400-e29b-41d4-a716-446655440099\", \"severity\": \"LOW\", \"timestamp\": \"2026-05-26T06:00:00Z\", \"payload\": { \"title\": \"Smoke\", \"message\": \"Smoke test\", \"source\": \"smoke\" }, \"channels\": [\"app\"] }" },
+            "url": "{{baseUrl}}/events/alert.created"
+          },
+          "event": [ { "listen": "test", "script": { "exec": ["pm.test('Smoke queued', function() { pm.response.to.have.status(202); });"] } } ]
+        }
+      ]
+    },
+    {
+      "name": "06_Local_only_NonFunctional",
+      "item": [
+        {
+          "name": "GET /health (local perf)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/health" },
+          "event": [ { "listen": "test", "script": { "exec": ["if (pm.environment.get('env') === 'local') { pm.test('Response time below 1000ms', function() { pm.expect(pm.response.responseTime).to.be.below(1000); }); }"] } } ]
+        }
+      ]
+    }
+  ]
+}

@@ -4,9 +4,9 @@
   "description": "FIT4110 Lab 05 - Docker Compose readiness and end-to-end verification for Smart Campus services",
   "private": true,
   "scripts": {
-    "mock:iot": "prism mock contracts/iot-ingestion.openapi.yaml --host 0.0.0.0 --port 4010",
-    "lint:openapi": "spectral lint contracts/*.yaml",
-    "test:compose": "echo 'TODO: copy Postman collection from Lab 04 into postman/collections and update this script.'"
+    "mock:notification": "prism mock contracts/team-notify.openapi.yaml --host 0.0.0.0 --port 4010",
+    "lint:openapi": "spectral lint contracts/*.yaml --ruleset .spectralrc.yaml",
+    "test:compose": "newman run postman/collections/team-notify.postman_collection.json -e postman/environments/team-notify_local.postman_environment.json -r cli,junit,htmlextra --reporter-junit-export reports/newman-lab05-compose.xml --reporter-htmlextra-export reports/newman-lab05-compose.html"
   },
   "devDependencies": {
     "@stoplight/prism-cli": "^5.10.0",
